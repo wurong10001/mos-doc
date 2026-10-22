@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MOS 架构设计</title>
+    <meta name="description" content="MOS 架构设计说明" />
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-mark">M</div>
+          <div>
+            <div class="brand-name">MOS</div>
+            <div class="brand-subtitle">System Documentation</div>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="主导航">
+          <a class="nav-item" href="./index.html">概览</a>
+          <a class="nav-item active" href="./architecture.html">架构设计</a>
+          <a class="nav-item" href="./repos.html">仓库说明</a>
+          <a class="nav-item" href="./development.html">开发手册</a>
+          <a class="nav-item" href="./roadmap.html">路线图</a>
+        </nav>
+
+        <div class="mini-card">
+          <div class="mini-label">架构重点</div>
+          <div class="mini-value">桌面 / 运行时 / 扩展</div>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <div class="crumb">MOS / 架构设计</div>
+            <h1>架构设计</h1>
+          </div>
+        </header>
+
+        <section class="card">
+          <h3>整体分层</h3>
+          <div class="layer-diagram">
+            <div class="layer-box">
+              <span class="layer-name">层 1：体验层</span>
+              <span>桌面 UI / 移动端触屏 UI</span>
+            </div>
+            <div class="layer-box">
+              <span class="layer-name">层 2：接入层</span>
+              <span>Cloudflare Worker + 静态资源服务</span>
+            </div>
+            <div class="layer-box">
+              <span class="layer-name">层 3：执行层</span>
+              <span>Android Native + C++ + Wasm</span>
+            </div>
+            <div class="layer-box">
+              <span class="layer-name">层 4：应用层</span>
+              <span>软件源 / 业务模块 / 统一扩展</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card-grid two-col">
+          <article class="card">
+            <h3>Web 入口</h3>
+            <p>
+              `MOS` 仓库通过 Cloudflare Worker 接收请求。
+              如果访问根路径，代码会根据 UA 判断设备类型：桌面端或移动端，然后跳转到对应页面。
+            </p>
+            <pre class="code-block">if (url.pathname === '/') {
+  const isTouchDevice = /android|iphone|ipad|mobile/i.test(userAgent);
+  url.pathname = isTouchDevice ? '/mobile.html' : '/desktop.html';
+}</pre>
+          </article>
+
+          <article class="card">
+            <h3>Android 宿主</h3>
+            <p>
+              `mos-android` 采用 NativeActivity + C++ 作为原生宿主层，使用 `wasm3` 来执行 WebAssembly 代码，
+              使系统具备轻量运行时能力与跨平台扩展潜力。
+            </p>
+          </article>
+        </section>
+
+        <section class="card">
+          <h3>设计特点</h3>
+          <ul class="bullet-list">
+            <li>以“桌面系统交互”作为视觉基线，而不是普通网页布局。</li>
+            <li>Web 端和 Android 端的用户感知保持同一系统语言。</li>
+            <li>Wasm 执行能力为后续扩展应用/模块提供底层标准化执行环境。</li>
+            <li>系统设计允许从 UI 原型逐步演化为完整的应用生态。</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MOS 路线图</title>
+    <meta name="description" content="MOS 项目路线图" />
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-mark">M</div>
+          <div>
+            <div class="brand-name">MOS</div>
+            <div class="brand-subtitle">System Documentation</div>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="主导航">
+          <a class="nav-item" href="./index.html">概览</a>
+          <a class="nav-item" href="./architecture.html">架构设计</a>
+          <a class="nav-item" href="./repos.html">仓库说明</a>
+          <a class="nav-item" href="./development.html">开发手册</a>
+          <a class="nav-item active" href="./roadmap.html">路线图</a>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <div class="crumb">MOS / 路线图</div>
+            <h1>路线图</h1>
+          </div>
+        </header>
+
+        <section class="card-grid two-col">
+          <article class="card milestone">
+            <span class="phase">Phase 1</span>
+            <h3>桌面原型建立</h3>
+            <p>完成桌面 / 触屏界面 shell，并稳定两套视觉风格。</p>
+          </article>
+
+          <article class="card milestone">
+            <span class="phase">Phase 2</span>
+            <h3>Web 入口服务化</h3>
+            <p>提升 Cloudflare Worker 路由能力，形成统一入口、统一资源加载、统一启动逻辑。</p>
+          </article>
+
+          <article class="card milestone">
+            <span class="phase">Phase 3</span>
+            <h3>Android 宿主稳定化</h3>
+            <p>完善 Native 层事件循环、日志、崩溃处理、Wasm 运行时管理。</p>
+          </article>
+
+          <article class="card milestone">
+            <span class="phase">Phase 4</span>
+            <h3>软件源化</h3>
+            <p>以 `mos-repo` 为基础，归档应用、模块与包结构，形成统一软件源。</p>
+          </article>
+
+          <article class="card milestone">
+            <span class="phase">Phase 5</span>
+            <h3>系统生态扩展</h3>
+            <p>在 Web + Android + Wasm 的基础上，逐步实现文件管理、通知、设置、应用启动器等基本系统能力。</p>
+          </article>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
