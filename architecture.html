@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MOS 架构设计</title>
-    <meta name="description" content="MOS 的分层结构：Web 入口、Android 宿主与 Wasm 执行层" />
+    <title>MOS 教程 · 系统架构</title>
+    <meta name="description" content="MOS 的四层结构：体验层、接入层、执行层、应用层，以及一次请求的实际走向" />
     <link rel="stylesheet" href="./assets/style.css" />
   </head>
   <body>
@@ -13,89 +13,151 @@
         <div class="brand-wrap">
           <div class="brand-mark">M</div>
           <div>
-            <div class="brand-name">MOS</div>
-            <div class="brand-subtitle">System Documentation</div>
+            <div class="brand-name">MOS 教程</div>
+            <div class="brand-subtitle">从入口读到运行时</div>
           </div>
         </div>
 
-        <nav class="nav" aria-label="主导航">
-          <a class="nav-item" href="./index.html">概览</a>
-          <a class="nav-item active" href="./architecture.html">架构设计</a>
-          <a class="nav-item" href="./repos.html">仓库说明</a>
-          <a class="nav-item" href="./development.html">开发手册</a>
-          <a class="nav-item" href="./roadmap.html">路线图</a>
+        <nav class="nav" aria-label="章节导航">
+          <a class="nav-item" href="./index.html"><span class="nav-no">01</span>开始</a>
+          <a class="nav-item" href="./concepts.html"><span class="nav-no">02</span>预备概念</a>
+          <a class="nav-item active" href="./architecture.html"><span class="nav-no">03</span>系统架构</a>
+          <a class="nav-item" href="./repos.html"><span class="nav-no">04</span>代码在哪</a>
+          <a class="nav-item" href="./development.html"><span class="nav-no">05</span>动手跑起来</a>
+          <a class="nav-item" href="./roadmap.html"><span class="nav-no">06</span>继续深入</a>
         </nav>
+
+        <div class="sidebar-foot">
+          <a href="https://github.com/wurong10001" target="_blank" rel="noreferrer">wurong10001</a>
+        </div>
       </aside>
 
       <main class="content">
-        <header class="topbar">
-          <div>
-            <div class="crumb">MOS / 架构设计</div>
-            <h1>架构设计</h1>
-          </div>
-        </header>
+        <div class="wrap">
+          <header class="topbar">
+            <div class="crumb">MOS / 03 系统架构</div>
+            <a class="header-action" href="https://github.com/wurong10001" target="_blank" rel="noreferrer">GitHub</a>
+          </header>
 
-        <section class="card">
-          <h3>四层怎么分的</h3>
-          <div class="layer-diagram">
-            <div class="layer-box">
-              <span class="layer-name">体验层</span>
-              <span>desktop.html / mobile.html</span>
-            </div>
-            <div class="layer-box">
-              <span class="layer-name">接入层</span>
-              <span>Cloudflare Worker</span>
-            </div>
-            <div class="layer-box">
-              <span class="layer-name">执行层</span>
-              <span>NativeActivity + C++</span>
-            </div>
-            <div class="layer-box">
-              <span class="layer-name">应用层</span>
-              <span>wasm3 + Wasm 模块</span>
-            </div>
-          </div>
-          <p>
-            上面两层在 Web 侧，一次 HTTP 请求就走完了；下面两层在 Android 侧，跟网络没关系。
-            两边目前没有通信，各跑各的，这是眼下最大的结构缺口。
+          <span class="lesson-no">第 03 节</span>
+          <h1>系统架构</h1>
+
+          <p class="lead">
+            MOS 分成四层。上面两层跑在 Web 侧，一次 HTTP 请求就走完了；
+            下面两层跑在 Android 侧，跟网络没有关系。这一节讲清楚每层做什么，
+            以及一个关键事实：这两半目前各跑各的，中间没有连起来。
           </p>
-        </section>
 
-        <section class="card-grid two-col">
-          <article class="card">
-            <h3>Web 入口</h3>
-            <p>
-              Worker 只做一件事：看到根路径，读 UA，把请求改写到对应页面，再把请求转给静态资源。
-            </p>
-            <pre class="code-block">if (url.pathname === '/') {
+          <h2>四层分别是干什么的</h2>
+          <div class="term-list">
+            <div class="term">
+              <span class="term-name">体验层 · desktop.html / mobile.html</span>
+              <p>
+                用户看到的东西。桌面端有状态栏、Dock、欢迎页，深蓝主色；
+                触屏端是另一套布局。两边共用 <code>public/assets/system.css</code>。
+              </p>
+            </div>
+            <div class="term">
+              <span class="term-name">接入层 · Cloudflare Worker</span>
+              <p>
+                只有 <code>src/index.js</code> 一个文件。收到请求后判断设备类型，改写到对应页面，再交给静态资源。
+              </p>
+            </div>
+            <div class="term">
+              <span class="term-name">执行层 · NativeActivity + C++</span>
+              <p>
+                Android 侧的宿主。主循环在 <code>main.cpp</code>，调度在 <code>engine.cpp</code>，
+                Wasm 的加载调用在 <code>wasm_runner.cpp</code>。
+              </p>
+            </div>
+            <div class="term">
+              <span class="term-name">应用层 · wasm3 + Wasm 模块</span>
+              <p>
+                应用逻辑编译成 <code>.wasm</code>，交给 wasm3 执行。目前只有一个 <code>sample.wasm</code> 示例。
+              </p>
+            </div>
+          </div>
+
+          <h2>一次访问是怎么走的</h2>
+          <p>这是整个 Web 侧的完整链路，没有别的东西了：</p>
+          <pre class="flow">浏览器 GET /
+   ↓
+Worker (src/index.js) 读 UA
+   ↓
+判定触屏 → pathname = /mobile.html
+判定桌面 → pathname = /desktop.html
+   ↓
+env.ASSETS.fetch() 取静态文件
+   ↓
+返回 HTML → 浏览器加载 system.css → 画出桌面</pre>
+          <p>对应的代码就这几行，全部的服务端逻辑：</p>
+          <pre class="code-block">if (url.pathname === '/') {
   const isTouchDevice = /android|iphone|ipad|mobile/i.test(userAgent);
   url.pathname = isTouchDevice ? '/mobile.html' : '/desktop.html';
-}</pre>
-            <p>没有后端，没有数据库，改界面就是改 public 目录下的 HTML 和 CSS。</p>
-          </article>
+}
+return env.ASSETS.fetch(new Request(url, request));</pre>
+          <p>
+            注意最后一行：改完路径转手给静态资源，Worker 自己不产出内容。
+            所以这一层没有后端、没有数据库，改界面就是改 <code>public</code> 下的 HTML 和 CSS。
+          </p>
 
-          <article class="card">
-            <h3>Android 宿主</h3>
+          <h2>Android 侧是怎么启动的</h2>
+          <p>流程和 Web 侧完全不同，两者之间没有任何通信：</p>
+          <pre class="flow">系统启动 Activity (NativeActivity)
+   ↓
+native_app_glue 建立事件队列，拉起 C++ 主循环
+   ↓
+main.cpp 循环取事件 → 交给 engine.cpp 分发
+   ↓
+需要跑应用时 wasm_runner.cpp 加载 sample.wasm
+   ↓
+wasm3 逐条解释执行 → 结果回到 C++</pre>
+          <p>
+            三个 cpp 文件通过 <code>app/src/main/cpp/CMakeLists.txt</code> 编成一个 native library，
+            再放进 <code>jniLibs</code> 打进 APK。
+          </p>
+
+          <h2>现在缺的那一段</h2>
+          <div class="callout">
+            <span class="label">这是理解现状最重要的一点</span>
             <p>
-              主循环在 main.cpp，引擎调度在 engine.cpp，Wasm 的加载和调用在 wasm_runner.cpp。
-              三者通过 app/src/main/cpp/CMakeLists.txt 一起编成 native library。
+              Wasm 模块目前拿不到任何系统能力。它没有文件、没有网络、拿不到时间，只能自己算自己的。
+              原因在 02 节讲过：Wasm 跑在沙箱里，要用外部能力得由宿主导入函数，而这套导入约定还没写。
             </p>
             <p>
-              解释器选 wasm3 而不是 Wasmtime，原因是它体积小、依赖少，塞进 APK 不占地方，
-              代价是执行速度比 JIT 方案慢一截。
+              所以严格来说，现在还没有真正的「应用」，只有一个能跑起来的 Wasm 示例。
+              后面所有关于应用的设想，都卡在这一步。
             </p>
-          </article>
-        </section>
-
-        <section class="card">
-          <h3>几个还没定的问题</h3>
+          </div>
+          <p>另外几处还没接上的地方：</p>
           <ul class="bullet-list">
-            <li>Wasm 模块怎么调用系统能力，还没有 import 约定，现在只能自己跑自己</li>
-            <li>Web 端和 Android 端各有一套界面代码，视觉靠人工对齐，没有共享的部分</li>
-            <li>应用从哪来、怎么装、版本怎么管，都还没开始设计</li>
-            <li>Native 层的日志和崩溃收集只在 Android 侧有，Web 侧什么都没有</li>
+            <li>Web 端和 Android 端各写一套界面，视觉靠人工对齐，没有共享的部分</li>
+            <li>桌面上的图标点开没有实际内容，Dock 目前是静态的</li>
+            <li>应用从哪来、怎么装、版本怎么管都还没开始设计</li>
+            <li>Native 层有日志和崩溃处理，Web 侧什么都没有</li>
           </ul>
-        </section>
+
+          <div class="check">
+            <h3>这一节要点</h3>
+            <ul>
+              <li>四层：体验、接入、执行、应用，前两层在 Web，后两层在 Android</li>
+              <li>Web 侧一次请求走完，Worker 只做 UA 分流，最终由静态资源产出页面</li>
+              <li>Android 侧由 NativeActivity 拉起 C++ 主循环，wasm3 负责执行模块</li>
+              <li>两半之间没有通信，Wasm 拿不到系统能力是当前最大的缺口</li>
+            </ul>
+          </div>
+
+          <nav class="pager">
+            <a class="pager-item" href="./concepts.html">
+              <span>上一节</span>
+              <strong>02 预备概念</strong>
+            </a>
+            <a class="pager-item pager-next" href="./repos.html">
+              <span>下一节</span>
+              <strong>04 代码在哪</strong>
+            </a>
+          </nav>
+        </div>
       </main>
     </div>
   </body>
