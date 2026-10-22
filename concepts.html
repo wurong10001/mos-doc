@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MOS 教程 · 预备概念</title>
-    <meta name="description" content="理解 MOS 需要的前置概念：WebAssembly、wasm3、Cloudflare Worker、NativeActivity、NDK" />
+    <title>MOS 文档 · 预备概念</title>
+    <meta name="description" content="开发 MOS 应用需要了解的概念：WebAssembly、沙箱与导入导出、wasm3、Worker、NativeActivity" />
     <link rel="stylesheet" href="./assets/style.css" />
   </head>
   <body>
@@ -13,18 +13,21 @@
         <div class="brand-wrap">
           <div class="brand-mark">M</div>
           <div>
-            <div class="brand-name">MOS 教程</div>
-            <div class="brand-subtitle">从入口读到运行时</div>
+            <div class="brand-name">MOS 文档</div>
+            <div class="brand-subtitle">使用 · 开发</div>
           </div>
         </div>
 
         <nav class="nav" aria-label="章节导航">
+          <div class="nav-group">使用 MOS</div>
           <a class="nav-item" href="./index.html"><span class="nav-no">01</span>开始</a>
-          <a class="nav-item active" href="./concepts.html"><span class="nav-no">02</span>预备概念</a>
-          <a class="nav-item" href="./architecture.html"><span class="nav-no">03</span>系统架构</a>
-          <a class="nav-item" href="./repos.html"><span class="nav-no">04</span>代码在哪</a>
-          <a class="nav-item" href="./development.html"><span class="nav-no">05</span>动手跑起来</a>
-          <a class="nav-item" href="./roadmap.html"><span class="nav-no">06</span>继续深入</a>
+          <a class="nav-item" href="./access.html"><span class="nav-no">02</span>访问与界面</a>
+          <a class="nav-item" href="./using.html"><span class="nav-no">03</span>桌面与应用</a>
+          <div class="nav-group">开发 MOS 应用</div>
+          <a class="nav-item active" href="./concepts.html"><span class="nav-no">04</span>预备概念</a>
+          <a class="nav-item" href="./architecture.html"><span class="nav-no">05</span>系统构成</a>
+          <a class="nav-item" href="./appdev.html"><span class="nav-no">06</span>写第一个应用</a>
+          <a class="nav-item" href="./packaging.html"><span class="nav-no">07</span>打包与发布</a>
         </nav>
 
         <div class="sidebar-foot">
@@ -35,57 +38,91 @@
       <main class="content">
         <div class="wrap">
           <header class="topbar">
-            <div class="crumb">MOS / 02 预备概念</div>
+            <div class="crumb">MOS / 04 预备概念</div>
             <a class="header-action" href="https://github.com/wurong10001" target="_blank" rel="noreferrer">GitHub</a>
           </header>
 
-          <span class="lesson-no">第 02 节</span>
+          <span class="lesson-no">第 04 节</span>
           <h1>预备概念</h1>
 
           <p class="lead">
-            MOS 把几样平时不太会放在一起的东西拼到了一起。这一节把它们逐个讲清楚，
-            后面看架构和代码就不用边看边查了。已经熟悉的可以直接跳到 03。
+            MOS 的应用跑在 WebAssembly 里，由原生宿主加载执行。
+            这一节把相关的几个概念讲清楚，后面写应用时不用边写边查。
           </p>
 
           <h2>WebAssembly</h2>
           <p>
             一种字节码格式。你用 C、C++、Rust 写的代码，编译成 <code>.wasm</code> 文件，
-            运行时拿来加载执行。它不是给人读的，是给虚拟机读的，所以体积小、解析快。
+            由运行时加载执行。它不是给人读的，是给虚拟机读的，所以体积小、解析快，
+            而且同一个文件在不同 CPU 架构上都能跑。
           </p>
           <p>
-            关键点在<strong>沙箱</strong>：Wasm 模块默认什么都碰不到，不能直接读文件、不能开网络。
-            它想用外部能力，必须由宿主显式地把函数「导入」给它。这条限制决定了 MOS 里应用和系统的边界怎么划，后面会反复提到。
+            对 MOS 来说这点很关键：应用编译一次，桌面上能跑，手机上也能跑，不用为每种设备单独出包。
           </p>
+
+          <h2>沙箱、导入与导出</h2>
+          <p>
+            这是整个开发模型里最重要的一条：<strong>Wasm 模块默认什么都碰不到</strong>。
+            它不能直接读文件、不能开网络、不知道现在几点。
+          </p>
+          <p>模块和外界打交道只有两个方向：</p>
+          <div class="term-list">
+            <div class="term">
+              <span class="term-name">导入（import）</span>
+              <p>
+                模块声明「我需要一个叫 X 的函数」，由宿主在加载时把真实实现填进去。
+                模块想用系统能力，走的都是这条路。
+              </p>
+            </div>
+            <div class="term">
+              <span class="term-name">导出（export）</span>
+              <p>
+                模块把自己的函数暴露出去，让宿主调用。
+                宿主靠这些导出函数通知应用「该初始化了」「有一帧要画」「用户点了一下」。
+              </p>
+            </div>
+          </div>
+          <div class="callout">
+            <span class="label">记住这个模型</span>
+            <p>
+              应用是被动的。它不会自己去拿东西，只能等宿主调用它的导出函数，
+              再在过程中通过导入函数请求系统能力。写应用时脑子里要有这个主客关系。
+            </p>
+          </div>
 
           <h2>wasm3</h2>
           <p>
-            一个 Wasm 解释器。解释器的意思是逐条读指令、逐条执行，不做编译优化。
-            常见的另一类实现是带 JIT 的（比如 Wasmtime、V8 里的 Wasm），先把字节码编译成本地机器码再跑，快很多，但体积也大得多。
+            MOS 用的 Wasm 运行时。它是<strong>解释器</strong>：逐条读指令、逐条执行，不做编译优化。
           </p>
           <p>
-            MOS 选 wasm3 的理由很实际：它只有几个 C 文件，塞进 APK 不占地方，在手机上也能跑。
-            代价是执行速度慢一截。对一个还在验证结构的原型来说，这个交换是划算的。
+            另一类实现带 JIT（即时编译），先把字节码编译成本地机器码再跑，快很多，
+            但体积和内存占用也大得多。wasm3 只有几个 C 文件，塞进手机应用包里很轻，
+            代价是执行速度慢一截。
+          </p>
+          <p>
+            对你的实际影响：写应用时别指望它有本地代码的性能，
+            适合逻辑型、交互型的应用，不适合在模块里跑重计算。
           </p>
 
           <h2>Cloudflare Worker</h2>
           <p>
-            一段跑在 Cloudflare 边缘节点上的 JavaScript。没有服务器，没有进程要维护，
-            请求来了就执行这段代码，执行完就结束。代码里能拿到 <code>request</code>，要返回一个 <code>Response</code>。
+            一段跑在边缘节点上的 JavaScript。没有服务器要维护，请求来了执行，执行完就结束。
+            能拿到 <code>request</code>，返回一个 <code>Response</code>。
           </p>
           <p>
-            MOS 用它做的事很轻：读一下 UA，改一下路径，把请求转给静态资源。
-            这类「挡在静态文件前面做点小处理」的活，正是 Worker 最擅长的场景。
+            MOS 用它做接入：读 UA 判断设备，把请求改写到对应页面，再交给静态资源。
+            这一层你作为应用开发者基本不用碰，除非你要改入口行为。
           </p>
 
           <h2>NativeActivity</h2>
           <p>
             Android 提供的一种入口，让整个应用可以不写 Java UI，直接由 C++ 接管。
-            系统把事件（触摸、生命周期、窗口变化）通过 <code>native_app_glue</code> 这个胶水层喂给你的 C++ 主循环，
-            你自己处理，自己绘制。
+            系统把触摸、生命周期、窗口变化这些事件通过 <code>native_app_glue</code>
+            喂给 C++ 主循环，由宿主自己处理和绘制。
           </p>
           <p>
-            好处是所有逻辑在一套 C++ 代码里，跟 Wasm 那层打交道的成本很低。
-            代价是界面相关的东西都得自己来，没有现成的 View、RecyclerView 可用。
+            好处是所有逻辑在一套 C++ 代码里，跟 Wasm 那层打交道的成本很低；
+            代价是界面相关的东西都得自己来，没有现成的 UI 组件可用。
           </p>
 
           <h2>NDK、CMake、jniLibs</h2>
@@ -97,50 +134,42 @@
             </div>
             <div class="term">
               <span class="term-name">CMake</span>
-              <p>构建工具。通过 <code>CMakeLists.txt</code> 描述「哪些源文件编成哪个库」，Gradle 会调用它。</p>
+              <p>构建工具。用 <code>CMakeLists.txt</code> 描述「哪些源文件编成哪个库」，Gradle 会调用它。</p>
             </div>
             <div class="term">
               <span class="term-name">jniLibs</span>
               <p>
-                一个目录位置（<code>app/src/main/jniLibs</code>）。放进去的 <code>.so</code> 会被直接打进 APK，
-                不需要本地再编译一次。
+                目录位置（<code>app/src/main/jniLibs</code>）。
+                放进去的 <code>.so</code> 会被直接打进 APK，不需要本地再编一遍。
               </p>
             </div>
-          </div>
-          <div class="callout">
-            <span class="label">这个区别在 MOS 里很重要</span>
-            <p>
-              mos-android 的原生库是预编译好放进 <code>jniLibs</code> 的，不走 NDK 现场编译。
-              所以你改了 C++ 源码之后，光跑 <code>./gradlew assembleDebug</code> 不会生效，
-              必须先重新编译出 <code>.so</code> 再拷进去。05 节会细说。
-            </p>
           </div>
 
           <h2>静态站点与 GitHub Pages</h2>
           <p>
-            这个教程本身就是静态站点：六个 HTML 文件加一个 CSS，没有后端。
-            推到仓库的 main 分支，GitHub Pages 会自动把它发布到一个公开地址，改完推上去过一会儿就能看到。
+            这份文档本身就是静态站点：几个 HTML 加一个 CSS，没有后端。
+            推到仓库的 main 分支，GitHub Pages 会自动发布到公开地址。
           </p>
 
           <div class="check">
             <h3>这一节要点</h3>
             <ul>
-              <li>Wasm 默认跑在沙箱里，要用外部能力必须靠宿主导入函数</li>
-              <li>wasm3 是解释器，小而慢；带 JIT 的运行时大而快</li>
-              <li>Worker 是请求进来才执行的轻量 JS，适合做分流和改写</li>
-              <li>NativeActivity 让 C++ 直接接管 Android 应用，代价是没有现成 UI 组件</li>
-              <li>jniLibs 里放的是预编译好的 .so，改 C++ 后必须重新编译</li>
+              <li>Wasm 编译一次到处能跑，这是 MOS 选它做应用格式的原因</li>
+              <li>模块默认在沙箱里：用系统能力靠 import，被调用靠 export</li>
+              <li>应用是被动的，等宿主调用，不要写主动去拿东西的代码</li>
+              <li>wasm3 是解释器，小而轻，不适合重计算</li>
+              <li>Worker 只管接入分流，NativeActivity 让 C++ 接管 Android 界面</li>
             </ul>
           </div>
 
           <nav class="pager">
-            <a class="pager-item" href="./index.html">
+            <a class="pager-item" href="./using.html">
               <span>上一节</span>
-              <strong>01 开始</strong>
+              <strong>03 桌面与应用</strong>
             </a>
             <a class="pager-item pager-next" href="./architecture.html">
               <span>下一节</span>
-              <strong>03 系统架构</strong>
+              <strong>05 系统构成</strong>
             </a>
           </nav>
         </div>

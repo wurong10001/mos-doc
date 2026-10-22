@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MOS 文档 · 桌面与应用</title>
+    <meta name="description" content="MOS 桌面的操作方式：状态栏、Dock、启动与切换应用、软件源安装应用" />
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-mark">M</div>
+          <div>
+            <div class="brand-name">MOS 文档</div>
+            <div class="brand-subtitle">使用 · 开发</div>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="章节导航">
+          <div class="nav-group">使用 MOS</div>
+          <a class="nav-item" href="./index.html"><span class="nav-no">01</span>开始</a>
+          <a class="nav-item" href="./access.html"><span class="nav-no">02</span>访问与界面</a>
+          <a class="nav-item active" href="./using.html"><span class="nav-no">03</span>桌面与应用</a>
+          <div class="nav-group">开发 MOS 应用</div>
+          <a class="nav-item" href="./concepts.html"><span class="nav-no">04</span>预备概念</a>
+          <a class="nav-item" href="./architecture.html"><span class="nav-no">05</span>系统构成</a>
+          <a class="nav-item" href="./appdev.html"><span class="nav-no">06</span>写第一个应用</a>
+          <a class="nav-item" href="./packaging.html"><span class="nav-no">07</span>打包与发布</a>
+        </nav>
+
+        <div class="sidebar-foot">
+          <a href="https://github.com/wurong10001" target="_blank" rel="noreferrer">wurong10001</a>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="wrap">
+          <header class="topbar">
+            <div class="crumb">MOS / 03 桌面与应用</div>
+            <a class="header-action" href="https://github.com/wurong10001" target="_blank" rel="noreferrer">GitHub</a>
+          </header>
+
+          <span class="lesson-no">第 03 节</span>
+          <h1>桌面与应用</h1>
+
+          <p class="lead">
+            这一节讲日常操作：怎么启动应用、怎么在几个应用之间切换、
+            应用是从哪来的、以及怎么装新的。
+          </p>
+
+          <h2>启动应用</h2>
+          <p>MOS 里启动一个应用有三种入口，用哪个都行：</p>
+          <div class="term-list">
+            <div class="term">
+              <span class="term-name">桌面图标</span>
+              <p>双击桌面区上的图标。这是最常用的一条路。</p>
+            </div>
+            <div class="term">
+              <span class="term-name">Dock</span>
+              <p>点底部应用栏里的图标。常用应用建议放这里，省得回桌面找。</p>
+            </div>
+            <div class="term">
+              <span class="term-name">已运行的应用</span>
+              <p>点 Dock 上带运行标记的图标，直接切回那个应用，不会重复启动。</p>
+            </div>
+          </div>
+
+          <h2>窗口</h2>
+          <p>
+            应用启动后会在桌面区开一个窗口。窗口顶部是标题栏，右侧是最小化、最大化、关闭。
+          </p>
+          <ul class="bullet-list">
+            <li><strong>切换</strong>：点另一个窗口的任意位置把它提到前面，或者点 Dock 上对应的图标</li>
+            <li><strong>最小化</strong>：收进 Dock，应用还在运行，点回来就恢复</li>
+            <li><strong>关闭</strong>：退出应用。没保存的内容会丢，关之前留意一下</li>
+          </ul>
+          <div class="callout">
+            <span class="label">最小化 ≠ 关闭</span>
+            <p>
+              最小化的应用仍在后台运行，占着系统资源，但不会再刷新界面。
+              把它点回来时会接着上一次的状态继续，这是它和关闭最大的区别。
+            </p>
+          </div>
+
+          <h2>状态栏</h2>
+          <p>
+            屏幕顶部的状态栏一直可见，不会被窗口盖住。它显示当前时间和系统状态，
+            有通知时会在这里出现提示。
+          </p>
+
+          <h2>触屏端怎么操作</h2>
+          <p>
+            手机上没有窗口这个概念，一次显示一个应用。从应用退出回到的是应用网格，
+            在里面点另一个图标就切过去了。已经在后台运行的应用会在网格里标出来。
+          </p>
+
+          <h2>应用从哪来</h2>
+          <p>
+            MOS 的应用都来自<strong>软件源</strong>，也就是 <code>mos-repo</code> 这个仓库。
+            它相当于系统自带的应用商店后台：每个应用是一个包，里面有一个 WebAssembly 模块和一份说明清单。
+          </p>
+          <p>
+            这样安排的好处是应用来源集中、可审计 —— 你能看到每个应用包里到底有什么，
+            版本怎么变的，谁提交上去的。
+          </p>
+
+          <h2>安装与管理</h2>
+          <ol class="steps">
+            <li><p>在软件源里找到想要的应用，每个应用都有一个唯一 id 和版本号。</p></li>
+            <li><p>安装时系统读取应用的清单，检查它声明需要哪些系统能力，列给你确认。</p></li>
+            <li><p>确认后应用包被放进系统，图标出现在桌面区和 Dock。</p></li>
+            <li><p>软件源里出了新版本，可以更新到最新版，也可以退回旧版本。</p></li>
+            <li><p>不用的应用可以卸载，图标和数据一起移除。</p></li>
+          </ol>
+          <div class="callout">
+            <span class="label">关于权限</span>
+            <p>
+              应用不能自己拿系统能力。它能用什么是清单里写死、安装时你确认过的。
+              比如一个计算器应用声明只用到最基本的界面能力，它就没有别的可拿。
+              这条限制是 WebAssembly 沙箱带来的，在 04 节会细讲。
+            </p>
+          </div>
+
+          <h2>常用操作对照</h2>
+          <div class="table-wrap">
+            <table class="spec-table">
+              <thead>
+                <tr>
+                  <th>想做什么</th>
+                  <th>桌面端</th>
+                  <th>触屏端</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>启动应用</td>
+                  <td>双击桌面图标或点 Dock</td>
+                  <td>点应用网格里的图标</td>
+                </tr>
+                <tr>
+                  <td>切换应用</td>
+                  <td>点目标窗口，或点 Dock 图标</td>
+                  <td>退出到网格再点另一个</td>
+                </tr>
+                <tr>
+                  <td>后台保留</td>
+                  <td>点窗口最小化</td>
+                  <td>直接退出，系统保留状态</td>
+                </tr>
+                <tr>
+                  <td>彻底退出</td>
+                  <td>点窗口关闭</td>
+                  <td>在多任务列表里划掉</td>
+                </tr>
+                <tr>
+                  <td>装新应用</td>
+                  <td>从软件源安装</td>
+                  <td>从软件源安装</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="check">
+            <h3>这一节要点</h3>
+            <ul>
+              <li>启动应用有三个入口：桌面图标、Dock、正在运行的实例</li>
+              <li>最小化是后台保留，关闭才是退出，两者不同</li>
+              <li>应用全部来自 mos-repo 软件源，一个应用 = 一个 Wasm 模块 + 一份清单</li>
+              <li>应用能用哪些系统能力由清单声明、安装时确认</li>
+            </ul>
+          </div>
+
+          <nav class="pager">
+            <a class="pager-item" href="./access.html">
+              <span>上一节</span>
+              <strong>02 访问与界面</strong>
+            </a>
+            <a class="pager-item pager-next" href="./concepts.html">
+              <span>下一节</span>
+              <strong>04 预备概念</strong>
+            </a>
+          </nav>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

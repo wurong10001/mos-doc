@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MOS 文档 · 访问与界面</title>
+    <meta name="description" content="MOS 的访问方式、设备自动分流规则，以及桌面端与触屏端的界面差异" />
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-mark">M</div>
+          <div>
+            <div class="brand-name">MOS 文档</div>
+            <div class="brand-subtitle">使用 · 开发</div>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="章节导航">
+          <div class="nav-group">使用 MOS</div>
+          <a class="nav-item" href="./index.html"><span class="nav-no">01</span>开始</a>
+          <a class="nav-item active" href="./access.html"><span class="nav-no">02</span>访问与界面</a>
+          <a class="nav-item" href="./using.html"><span class="nav-no">03</span>桌面与应用</a>
+          <div class="nav-group">开发 MOS 应用</div>
+          <a class="nav-item" href="./concepts.html"><span class="nav-no">04</span>预备概念</a>
+          <a class="nav-item" href="./architecture.html"><span class="nav-no">05</span>系统构成</a>
+          <a class="nav-item" href="./appdev.html"><span class="nav-no">06</span>写第一个应用</a>
+          <a class="nav-item" href="./packaging.html"><span class="nav-no">07</span>打包与发布</a>
+        </nav>
+
+        <div class="sidebar-foot">
+          <a href="https://github.com/wurong10001" target="_blank" rel="noreferrer">wurong10001</a>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="wrap">
+          <header class="topbar">
+            <div class="crumb">MOS / 02 访问与界面</div>
+            <a class="header-action" href="https://github.com/wurong10001" target="_blank" rel="noreferrer">GitHub</a>
+          </header>
+
+          <span class="lesson-no">第 02 节</span>
+          <h1>访问与界面</h1>
+
+          <p class="lead">
+            MOS 不需要安装。用浏览器打开就行 —— 系统会根据你的设备自动给出对应的界面。
+            这一节讲它是怎么判断的，以及两套界面分别长什么样。
+          </p>
+
+          <h2>打开 MOS</h2>
+          <p>
+            在浏览器里访问 MOS 的地址即可。无论是电脑、手机还是平板，
+            地址是同一个，不需要记两个。
+          </p>
+          <p>
+            系统建议你把 MOS 添加到主屏幕或书签栏。这样下次打开时就跟启动一个普通应用没什么区别，
+            不会有地址栏占地方。
+          </p>
+
+          <h2>为什么会看到不同的界面</h2>
+          <p>
+            你在电脑上和手机上打开同一个地址，看到的不是同一套布局。这不是两个网站，
+            而是系统在请求进来的时候替你做了选择。
+          </p>
+          <pre class="flow">浏览器请求 /
+   ↓
+读取 UA（User-Agent）
+   ↓
+含 android / iphone / ipad / mobile 等标识 → 触屏界面
+否则 → 桌面界面
+   ↓
+返回对应页面</pre>
+          <p>
+            UA 是浏览器每次请求都会带上的一串标识，里面写了设备类型和浏览器版本。
+            MOS 只用它来判断「这是不是一台触屏设备」，不做别的用途。
+          </p>
+
+          <div class="callout">
+            <span class="label">为什么按设备分开</span>
+            <p>
+              桌面用的是鼠标和键盘，屏幕上可以同时摆好几个窗口，所以图标可以排得密、可以悬停。
+              触屏用的是手指，需要更大的点击区域，一次通常只看一个应用。
+              这两套交互习惯差别太大，硬做成一套会两头都不好用，所以分开。
+            </p>
+          </div>
+
+          <h2>桌面端界面</h2>
+          <p>在电脑上打开，你会看到这几块：</p>
+          <div class="term-list">
+            <div class="term">
+              <span class="term-name">顶部状态栏</span>
+              <p>显示时间、系统状态。固定在屏幕顶部，不会被应用窗口盖住。</p>
+            </div>
+            <div class="term">
+              <span class="term-name">桌面区</span>
+              <p>中间大片区域，放应用图标。双击图标启动应用。</p>
+            </div>
+            <div class="term">
+              <span class="term-name">Dock</span>
+              <p>底部的应用栏，常驻显示常用应用。点一下就启动，正在运行的应用会有标记。</p>
+            </div>
+          </div>
+          <p>
+            配色是深蓝主色，图标和窗口带一点轻拟物质感 —— 目标是让人一眼认出这是个「桌面」，
+            而不是一个网页。
+          </p>
+
+          <h2>触屏端界面</h2>
+          <p>
+            在手机或平板上打开，布局会换成适合手指操作的形式：
+            点击区域更大，应用以网格铺开，一次主要操作一个应用。
+            状态栏保留，但内容按小屏精简。
+          </p>
+          <p>
+            桌面端和触屏端共用同一套视觉样式（<code>system.css</code>），
+            所以主色、圆角、图标风格在两边是一致的，只是排布不同。
+          </p>
+
+          <h2>想看另一套界面</h2>
+          <p>
+            自动判断的结果不一定每次都合你意。比如在电脑上想预览触屏效果，
+            可以直接访问对应的页面地址：
+          </p>
+          <ul class="bullet-list">
+            <li><code>/desktop.html</code> — 强制桌面端界面</li>
+            <li><code>/mobile.html</code> — 强制触屏端界面</li>
+          </ul>
+          <p>
+            这样访问会跳过 UA 判断，直接返回指定界面。
+            在电脑上想看手机版，用这个方法最省事。
+          </p>
+
+          <div class="check">
+            <h3>这一节要点</h3>
+            <ul>
+              <li>MOS 不用安装，浏览器打开即用，电脑和手机是同一个地址</li>
+              <li>系统读 UA 判断触屏还是桌面，自动返回对应界面</li>
+              <li>桌面端有状态栏、桌面区、Dock；触屏端布局更适合手指</li>
+              <li>想强制看某一套，直接访问 /desktop.html 或 /mobile.html</li>
+            </ul>
+          </div>
+
+          <nav class="pager">
+            <a class="pager-item" href="./index.html">
+              <span>上一节</span>
+              <strong>01 开始</strong>
+            </a>
+            <a class="pager-item pager-next" href="./using.html">
+              <span>下一节</span>
+              <strong>03 桌面与应用</strong>
+            </a>
+          </nav>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

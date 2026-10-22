@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MOS 文档 · 写第一个应用</title>
+    <meta name="description" content="从环境搭建到编译出一个能被 MOS 加载的 WebAssembly 应用模块" />
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-mark">M</div>
+          <div>
+            <div class="brand-name">MOS 文档</div>
+            <div class="brand-subtitle">使用 · 开发</div>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="章节导航">
+          <div class="nav-group">使用 MOS</div>
+          <a class="nav-item" href="./index.html"><span class="nav-no">01</span>开始</a>
+          <a class="nav-item" href="./access.html"><span class="nav-no">02</span>访问与界面</a>
+          <a class="nav-item" href="./using.html"><span class="nav-no">03</span>桌面与应用</a>
+          <div class="nav-group">开发 MOS 应用</div>
+          <a class="nav-item" href="./concepts.html"><span class="nav-no">04</span>预备概念</a>
+          <a class="nav-item" href="./architecture.html"><span class="nav-no">05</span>系统构成</a>
+          <a class="nav-item active" href="./appdev.html"><span class="nav-no">06</span>写第一个应用</a>
+          <a class="nav-item" href="./packaging.html"><span class="nav-no">07</span>打包与发布</a>
+        </nav>
+
+        <div class="sidebar-foot">
+          <a href="https://github.com/wurong10001" target="_blank" rel="noreferrer">wurong10001</a>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="wrap">
+          <header class="topbar">
+            <div class="crumb">MOS / 06 写第一个应用</div>
+            <a class="header-action" href="https://github.com/wurong10001" target="_blank" rel="noreferrer">GitHub</a>
+          </header>
+
+          <span class="lesson-no">第 06 节</span>
+          <h1>写第一个应用</h1>
+
+          <p class="lead">
+            这一节带你从零写出一个能被 MOS 加载的应用：搭建环境、写模块、编译成
+            <code>.wasm</code>、在设备上跑起来看日志。目标是走通一整圈。
+          </p>
+
+          <h2>准备工具</h2>
+          <p>需要三样东西，都是命令行工具：</p>
+          <ul class="bullet-list">
+            <li><strong>编译器</strong>：能把 C/C++ 编成 Wasm 的 clang，或者 Rust 的 <code>wasm32</code> 目标</li>
+            <li><strong>运行时</strong>：本机跑一个 Wasm 运行时，用来在电脑上先验证逻辑，不用每次都装到设备</li>
+            <li><strong>MOS 本体</strong>：浏览器打开即可测 Web 端，Android 端需要有编译好的 APK</li>
+          </ul>
+
+          <h2>选语言</h2>
+          <div class="table-wrap">
+            <table class="spec-table">
+              <thead>
+                <tr>
+                  <th>语言</th>
+                  <th>适合</th>
+                  <th>产物特点</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>C / C++</td>
+                  <td>已有原生代码要移植，或者对体积敏感</td>
+                  <td>产物最小，需要手动管内存</td>
+                </tr>
+                <tr>
+                  <td>Rust</td>
+                  <td>新写的逻辑，希望有类型安全</td>
+                  <td>产物略大，编译器能挡掉一大类错误</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            两种都行，MOS 不挑。下面的例子用 C，因为它最直白，
+            能看清导入导出是怎么写出来的。
+          </p>
+
+          <h2>写模块</h2>
+          <p>
+            按 05 节的约定，模块要导出四个函数，要用系统能力就导入对应的函数。
+            先看一个最小的骨架：
+          </p>
+          <pre class="code-block">// 导入：宿主提供
+extern void mos_log(const char* ptr, int len);
+extern long long mos_now_ms(void);
+
+// 导出：宿主调用
+__attribute__((export_name("mos_init")))
+void mos_init(void) {
+  const char msg[] = "hello mos";
+  mos_log(msg, sizeof(msg) - 1);
+}
+
+__attribute__((export_name("mos_event")))
+void mos_event(int type, int a, int b) { }
+
+__attribute__((export_name("mos_frame")))
+void mos_frame(void) { }
+
+__attribute__((export_name("mos_stop")))
+void mos_stop(void) { }</pre>
+          <p>几个要点：</p>
+          <ul class="bullet-list">
+            <li>导入函数只声明不实现，实现在宿主那边，加载时才接上</li>
+            <li>导出函数要显式指定导出名，C 编译器默认会加下划线前缀</li>
+            <li>字符串参数传的是指针加长度，不是 C 风格的字符串 —— Wasm 的内存是独立的一块，宿主不能直接读</li>
+            <li>四个导出函数即使暂时用不到也要有，宿主加载时找不到会报错</li>
+          </ul>
+
+          <div class="callout">
+            <span class="label">关于内存</span>
+            <p>
+              模块有自己独立的一块线性内存，宿主那边看到的就是一个字节数组。
+              所以传递字符串、结构体这类数据，都是「传地址 + 传长度」，
+              两边约定好布局。这是 Wasm 开发里最需要适应的地方。
+            </p>
+          </div>
+
+          <h2>编译</h2>
+          <pre class="code-block">$ clang --target=wasm32 \
+    -nostdlib -Wl,--no-entry \
+    -Wl,--export=mos_init \
+    -Wl,--export=mos_event \
+    -Wl,--export=mos_frame \
+    -Wl,--export=mos_stop \
+    -Wl,--allow-undefined \
+    -O2 -o app.wasm main.c</pre>
+          <p>几个参数的含义：</p>
+          <ul class="bullet-list">
+            <li><code>--target=wasm32</code> — 输出 Wasm 而不是本地机器码</li>
+            <li><code>-nostdlib</code> — 不带标准库，让产物尽量小。需要的话再单独链</li>
+            <li><code>--no-entry</code> — 模块没有 main 函数，它是被调用的，不是自己跑的</li>
+            <li><code>--allow-undefined</code> — 允许留着导入函数不解析，等宿主加载时填</li>
+          </ul>
+          <p>编译完看一下产物大小，正常应该是几 KB 量级：</p>
+          <pre class="code-block">$ ls -lh app.wasm</pre>
+
+          <h2>先在本机验证</h2>
+          <p>
+            别急着装到设备上。先用一个 Wasm 运行时在本机跑一遍，
+            手动把 <code>mos_log</code> 接上去，看能不能输出那行 hello：
+          </p>
+          <pre class="code-block">$ wasm3 app.wasm
+hello mos</pre>
+          <p>
+            这一步能挡掉大部分低级错误：导出名写错、导入没接上、编译参数漏了。
+            本机跑通了再去设备上，排查范围小很多。
+          </p>
+
+          <h2>放到 MOS 上跑</h2>
+          <ol class="steps">
+            <li><p>按 07 节的方式把模块和清单打成一个应用包。</p></li>
+            <li><p>通过软件源安装，或者用开发者方式直接推送到设备。</p></li>
+            <li><p>在桌面上点开应用图标。</p></li>
+            <li><p>看日志：Android 端用 <code>adb logcat</code>，Web 端在浏览器控制台。</p></li>
+          </ol>
+          <p>
+            如果那行 hello 出现在日志里，说明整条链路通了：
+            宿主加载了你的模块、注册了导入函数、调用了 <code>mos_init</code>。
+            接下来的事就是往 <code>mos_frame</code> 里填真正的绘制逻辑，
+            往 <code>mos_event</code> 里填交互处理。
+          </p>
+
+          <h2>调试建议</h2>
+          <ul class="bullet-list">
+            <li><code>mos_log</code> 是你最主要的调试手段，Wasm 里没法下断点，靠打日志定位</li>
+            <li>导入函数没接上时，模块加载阶段就会失败，日志里会写清缺哪个</li>
+            <li>内存越界在 Wasm 里会直接终止模块，通常表现为应用无响应退出</li>
+            <li>逻辑先在本机跑通，再去设备上调界面，效率差很多</li>
+          </ul>
+
+          <div class="check">
+            <h3>这一节要点</h3>
+            <ul>
+              <li>工具三样：Wasm 编译器、本机运行时、MOS 本体</li>
+              <li>模块导出四个函数，用系统能力就导入对应函数</li>
+              <li>编译要点：<code>--no-entry</code>、<code>--allow-undefined</code>、显式导出名</li>
+              <li>传数据是传地址加长度，模块内存对宿主就是一个字节数组</li>
+              <li>先本机跑通再上设备，日志是主要调试手段</li>
+            </ul>
+          </div>
+
+          <nav class="pager">
+            <a class="pager-item" href="./architecture.html">
+              <span>上一节</span>
+              <strong>05 系统构成</strong>
+            </a>
+            <a class="pager-item pager-next" href="./packaging.html">
+              <span>下一节</span>
+              <strong>07 打包与发布</strong>
+            </a>
+          </nav>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

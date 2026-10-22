@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MOS 教程 · 开始</title>
-    <meta name="description" content="MOS 系统教程：从 Web 桌面入口、Android 原生宿主到 Wasm 运行时，按章节讲清楚这套系统是怎么搭起来的" />
+    <title>MOS 文档 · 开始</title>
+    <meta name="description" content="MOS 文档：使用 MOS 桌面的说明，以及为 MOS 开发应用的完整指南" />
     <link rel="stylesheet" href="./assets/style.css" />
   </head>
   <body>
@@ -13,18 +13,21 @@
         <div class="brand-wrap">
           <div class="brand-mark">M</div>
           <div>
-            <div class="brand-name">MOS 教程</div>
-            <div class="brand-subtitle">从入口读到运行时</div>
+            <div class="brand-name">MOS 文档</div>
+            <div class="brand-subtitle">使用 · 开发</div>
           </div>
         </div>
 
         <nav class="nav" aria-label="章节导航">
+          <div class="nav-group">使用 MOS</div>
           <a class="nav-item active" href="./index.html"><span class="nav-no">01</span>开始</a>
-          <a class="nav-item" href="./concepts.html"><span class="nav-no">02</span>预备概念</a>
-          <a class="nav-item" href="./architecture.html"><span class="nav-no">03</span>系统架构</a>
-          <a class="nav-item" href="./repos.html"><span class="nav-no">04</span>代码在哪</a>
-          <a class="nav-item" href="./development.html"><span class="nav-no">05</span>动手跑起来</a>
-          <a class="nav-item" href="./roadmap.html"><span class="nav-no">06</span>继续深入</a>
+          <a class="nav-item" href="./access.html"><span class="nav-no">02</span>访问与界面</a>
+          <a class="nav-item" href="./using.html"><span class="nav-no">03</span>桌面与应用</a>
+          <div class="nav-group">开发 MOS 应用</div>
+          <a class="nav-item" href="./concepts.html"><span class="nav-no">04</span>预备概念</a>
+          <a class="nav-item" href="./architecture.html"><span class="nav-no">05</span>系统构成</a>
+          <a class="nav-item" href="./appdev.html"><span class="nav-no">06</span>写第一个应用</a>
+          <a class="nav-item" href="./packaging.html"><span class="nav-no">07</span>打包与发布</a>
         </nav>
 
         <div class="sidebar-foot">
@@ -39,80 +42,91 @@
             <a class="header-action" href="https://github.com/wurong10001" target="_blank" rel="noreferrer">GitHub</a>
           </header>
 
-          <h1>MOS 教程</h1>
+          <h1>MOS 文档</h1>
 
           <p class="lead">
-            这套教程讲的是 MOS：一个想把桌面操作方式搬到浏览器和手机上的项目。
-            读完你会知道它的四个仓库各自负责什么、一次访问是怎么从浏览器走到界面的、
-            Android 那边怎么用 C++ 跑起一个 WebAssembly 模块，以及怎么把它跑起来自己改。
+            MOS 是一套把桌面操作方式带到浏览器和手机上的系统。
+            这份文档分成两条线：一条给使用 MOS 的人，讲怎么访问、怎么操作桌面、怎么装应用；
+            另一条给为 MOS 写应用的人，讲应用跑在什么环境里、怎么写、怎么发布。
           </p>
 
-          <h2>这套教程适合谁</h2>
-          <p>
-            如果你想看懂这个项目在干什么，或者想接手改它，按顺序读就行。
-            需要的基础不多：能读懂 JavaScript 和一点 C++，知道命令行怎么用。
-            没接触过 WebAssembly 也没关系，第 02 节专门讲。
-          </p>
-
-          <div class="callout">
-            <span class="label">先说清楚一件事</span>
-            <p>
-              MOS 现在是个原型。界面能看，Android 工程能编译，Wasm 能加载执行一个示例模块。
-              但桌面上点开图标没有真正的应用，也没有窗口管理。教程里会明确标出哪些是能跑的、哪些还没有，避免你按成品去理解它。
-            </p>
-          </div>
-
-          <h2>六个章节</h2>
+          <h2>你是哪一类读者</h2>
           <div class="card-grid two-col">
             <article class="card">
-              <h3>01 开始</h3>
-              <p>这一页。讲这套教程的结构和读法。</p>
+              <h3>我要用 MOS</h3>
+              <p>
+                想知道怎么打开、桌面怎么用、应用怎么装。
+                读 01 到 03，不需要写代码的经验。
+              </p>
             </article>
             <article class="card">
-              <h3>02 预备概念</h3>
-              <p>WebAssembly、wasm3、Cloudflare Worker、NativeActivity、NDK 分别是什么。已经懂的可以跳过。</p>
-            </article>
-            <article class="card">
-              <h3>03 系统架构</h3>
-              <p>四个分层怎么划的，一次请求走哪条路，现在哪些地方还没接上。</p>
-            </article>
-            <article class="card">
-              <h3>04 代码在哪</h3>
-              <p>四个仓库各放什么，每个仓库里应该先看哪个文件。</p>
-            </article>
-            <article class="card">
-              <h3>05 动手跑起来</h3>
-              <p>Web 端和 Android 端各自的构建命令、验证方法，以及一个容易踩的坑。</p>
-            </article>
-            <article class="card">
-              <h3>06 继续深入</h3>
-              <p>三个可以自己动手的练习，以及项目接下来的方向。</p>
+              <h3>我要给 MOS 写应用</h3>
+              <p>
+                想把已有的 C/C++ 或 Rust 代码做成 MOS 应用，或者从零写一个。
+                读 04 到 07，需要会命令行，熟悉一门能编译到 WebAssembly 的语言。
+              </p>
             </article>
           </div>
 
-          <h2>怎么读</h2>
-          <p>
-            第一次接触就按 01 到 06 顺序读，每节末尾有个小结，答不上来可以回头再看一遍。
-            只想快速上手，可以跳到 05，卡住了再回来补 02 和 03。
-          </p>
-          <p>
-            教程里提到的文件路径都是相对各仓库根目录的，比如 <code>src/index.js</code> 指的是 MOS 仓库里的这个文件。
-          </p>
+          <h2>章节</h2>
+          <div class="term-list">
+            <div class="term">
+              <span class="term-name">01 开始</span>
+              <p>这一页。文档的组织方式和读法。</p>
+            </div>
+            <div class="term">
+              <span class="term-name">02 访问与界面</span>
+              <p>MOS 怎么打开，为什么你在手机和电脑上看到的界面不一样。</p>
+            </div>
+            <div class="term">
+              <span class="term-name">03 桌面与应用</span>
+              <p>状态栏、Dock、图标、窗口怎么用，应用从哪来、怎么装。</p>
+            </div>
+            <div class="term">
+              <span class="term-name">04 预备概念</span>
+              <p>WebAssembly、wasm3、沙箱与导入函数、Worker、NativeActivity。开发者必读。</p>
+            </div>
+            <div class="term">
+              <span class="term-name">05 系统构成</span>
+              <p>四个分层，以及你写的应用最终在哪一层被执行。</p>
+            </div>
+            <div class="term">
+              <span class="term-name">06 写第一个应用</span>
+              <p>从环境搭建到编译出第一个能被 MOS 加载的模块。</p>
+            </div>
+            <div class="term">
+              <span class="term-name">07 打包与发布</span>
+              <p>应用包的目录结构、清单字段、版本规则，以及提交到软件源的流程。</p>
+            </div>
+          </div>
+
+          <h2>几个约定</h2>
+          <ul class="bullet-list">
+            <li>
+              文档里出现的 <strong>MOS 应用</strong>指跑在 MOS 上的应用模块，一个应用就是一个 WebAssembly 模块加上一份清单。
+            </li>
+            <li>
+              文件路径都是相对各仓库根目录写的，比如 <code>src/index.js</code> 指 MOS 仓库里的这个文件。
+            </li>
+            <li>
+              命令行示例以 <code>$</code> 开头，<code>#</code> 开头的是注释，不用输入。
+            </li>
+          </ul>
 
           <div class="check">
             <h3>这一节要点</h3>
             <ul>
-              <li>MOS 是原型，不是成品，教程会区分「能跑的」和「还没有的」</li>
-              <li>一共六个章节，按依赖顺序排，不是按时间排</li>
-              <li>需要的基础：JavaScript、一点 C++、命令行</li>
+              <li>文档分两条线：01–03 给使用者，04–07 给应用开发者</li>
+              <li>MOS 应用 = 一个 Wasm 模块 + 一份清单</li>
+              <li>路径相对仓库根目录，命令行示例以 $ 开头</li>
             </ul>
           </div>
 
           <nav class="pager">
             <div class="pager-empty"></div>
-            <a class="pager-item pager-next" href="./concepts.html">
+            <a class="pager-item pager-next" href="./access.html">
               <span>下一节</span>
-              <strong>02 预备概念</strong>
+              <strong>02 访问与界面</strong>
             </a>
           </nav>
         </div>

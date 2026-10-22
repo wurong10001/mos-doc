@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MOS 教程 · 系统架构</title>
-    <meta name="description" content="MOS 的四层结构：体验层、接入层、执行层、应用层，以及一次请求的实际走向" />
+    <title>MOS 文档 · 系统构成</title>
+    <meta name="description" content="MOS 的四层结构，以及应用模块在哪一层被加载执行" />
     <link rel="stylesheet" href="./assets/style.css" />
   </head>
   <body>
@@ -13,18 +13,21 @@
         <div class="brand-wrap">
           <div class="brand-mark">M</div>
           <div>
-            <div class="brand-name">MOS 教程</div>
-            <div class="brand-subtitle">从入口读到运行时</div>
+            <div class="brand-name">MOS 文档</div>
+            <div class="brand-subtitle">使用 · 开发</div>
           </div>
         </div>
 
         <nav class="nav" aria-label="章节导航">
+          <div class="nav-group">使用 MOS</div>
           <a class="nav-item" href="./index.html"><span class="nav-no">01</span>开始</a>
-          <a class="nav-item" href="./concepts.html"><span class="nav-no">02</span>预备概念</a>
-          <a class="nav-item active" href="./architecture.html"><span class="nav-no">03</span>系统架构</a>
-          <a class="nav-item" href="./repos.html"><span class="nav-no">04</span>代码在哪</a>
-          <a class="nav-item" href="./development.html"><span class="nav-no">05</span>动手跑起来</a>
-          <a class="nav-item" href="./roadmap.html"><span class="nav-no">06</span>继续深入</a>
+          <a class="nav-item" href="./access.html"><span class="nav-no">02</span>访问与界面</a>
+          <a class="nav-item" href="./using.html"><span class="nav-no">03</span>桌面与应用</a>
+          <div class="nav-group">开发 MOS 应用</div>
+          <a class="nav-item" href="./concepts.html"><span class="nav-no">04</span>预备概念</a>
+          <a class="nav-item active" href="./architecture.html"><span class="nav-no">05</span>系统构成</a>
+          <a class="nav-item" href="./appdev.html"><span class="nav-no">06</span>写第一个应用</a>
+          <a class="nav-item" href="./packaging.html"><span class="nav-no">07</span>打包与发布</a>
         </nav>
 
         <div class="sidebar-foot">
@@ -35,126 +38,216 @@
       <main class="content">
         <div class="wrap">
           <header class="topbar">
-            <div class="crumb">MOS / 03 系统架构</div>
+            <div class="crumb">MOS / 05 系统构成</div>
             <a class="header-action" href="https://github.com/wurong10001" target="_blank" rel="noreferrer">GitHub</a>
           </header>
 
-          <span class="lesson-no">第 03 节</span>
-          <h1>系统架构</h1>
+          <span class="lesson-no">第 05 节</span>
+          <h1>系统构成</h1>
 
           <p class="lead">
-            MOS 分成四层。上面两层跑在 Web 侧，一次 HTTP 请求就走完了；
-            下面两层跑在 Android 侧，跟网络没有关系。这一节讲清楚每层做什么，
-            以及一个关键事实：这两半目前各跑各的，中间没有连起来。
+            MOS 分成四层。这一节讲每层做什么，以及最重要的一件事：
+            你写的应用住在最上面那一层，通过一层明确的接口跟下面打交道。
           </p>
 
-          <h2>四层分别是干什么的</h2>
+          <h2>四层</h2>
           <div class="term-list">
             <div class="term">
-              <span class="term-name">体验层 · desktop.html / mobile.html</span>
+              <span class="term-name">应用层 · Wasm 模块</span>
               <p>
-                用户看到的东西。桌面端有状态栏、Dock、欢迎页，深蓝主色；
-                触屏端是另一套布局。两边共用 <code>public/assets/system.css</code>。
+                <strong>这是你写的东西住的地方。</strong>
+                一个应用就是一个 WebAssembly 模块，加上一份描述它的清单。
+              </p>
+            </div>
+            <div class="term">
+              <span class="term-name">执行层 · 原生宿主 + wasm3</span>
+              <p>
+                加载模块、提供导入函数、调用模块的导出函数。
+                Android 侧是 NativeActivity 加 C++，Web 侧由浏览器承担同样的角色。
               </p>
             </div>
             <div class="term">
               <span class="term-name">接入层 · Cloudflare Worker</span>
               <p>
-                只有 <code>src/index.js</code> 一个文件。收到请求后判断设备类型，改写到对应页面，再交给静态资源。
+                处理入口请求，按 UA 分流到桌面或触屏界面，再交给静态资源。
               </p>
             </div>
             <div class="term">
-              <span class="term-name">执行层 · NativeActivity + C++</span>
+              <span class="term-name">体验层 · 桌面 / 触屏界面</span>
               <p>
-                Android 侧的宿主。主循环在 <code>main.cpp</code>，调度在 <code>engine.cpp</code>，
-                Wasm 的加载调用在 <code>wasm_runner.cpp</code>。
-              </p>
-            </div>
-            <div class="term">
-              <span class="term-name">应用层 · wasm3 + Wasm 模块</span>
-              <p>
-                应用逻辑编译成 <code>.wasm</code>，交给 wasm3 执行。目前只有一个 <code>sample.wasm</code> 示例。
+                用户看到的界面：状态栏、Dock、桌面区、窗口。共用一套视觉样式。
               </p>
             </div>
           </div>
 
-          <h2>一次访问是怎么走的</h2>
-          <p>这是整个 Web 侧的完整链路，没有别的东西了：</p>
-          <pre class="flow">浏览器 GET /
+          <h2>一次访问走哪条路</h2>
+          <pre class="flow">浏览器请求 /
    ↓
-Worker (src/index.js) 读 UA
+Worker 读 UA → 改写成 /desktop.html 或 /mobile.html
    ↓
-判定触屏 → pathname = /mobile.html
-判定桌面 → pathname = /desktop.html
+静态资源返回页面 → 加载 system.css → 画出桌面
    ↓
-env.ASSETS.fetch() 取静态文件
+用户点图标 → 宿主加载应用的 .wasm
    ↓
-返回 HTML → 浏览器加载 system.css → 画出桌面</pre>
-          <p>对应的代码就这几行，全部的服务端逻辑：</p>
-          <pre class="code-block">if (url.pathname === '/') {
-  const isTouchDevice = /android|iphone|ipad|mobile/i.test(userAgent);
-  url.pathname = isTouchDevice ? '/mobile.html' : '/desktop.html';
-}
-return env.ASSETS.fetch(new Request(url, request));</pre>
+wasm3 执行模块 → 结果回到界面</pre>
           <p>
-            注意最后一行：改完路径转手给静态资源，Worker 自己不产出内容。
-            所以这一层没有后端、没有数据库，改界面就是改 <code>public</code> 下的 HTML 和 CSS。
+            前两步是接入层和体验层的事，后两步才是应用真正参与的环节。
+            作为应用开发者，你只关心最后两行。
           </p>
 
-          <h2>Android 侧是怎么启动的</h2>
-          <p>流程和 Web 侧完全不同，两者之间没有任何通信：</p>
-          <pre class="flow">系统启动 Activity (NativeActivity)
-   ↓
-native_app_glue 建立事件队列，拉起 C++ 主循环
-   ↓
-main.cpp 循环取事件 → 交给 engine.cpp 分发
-   ↓
-需要跑应用时 wasm_runner.cpp 加载 sample.wasm
-   ↓
-wasm3 逐条解释执行 → 结果回到 C++</pre>
-          <p>
-            三个 cpp 文件通过 <code>app/src/main/cpp/CMakeLists.txt</code> 编成一个 native library，
-            再放进 <code>jniLibs</code> 打进 APK。
-          </p>
+          <h2>应用是怎么被跑起来的</h2>
+          <p>宿主加载一个模块的过程是固定的，理解它有助于你组织代码：</p>
+          <ol class="steps">
+            <li><p>读取应用包，取出 <code>.wasm</code> 文件和清单。</p></li>
+            <li><p>按清单里声明的权限，把对应的系统函数注册成模块的导入函数。</p></li>
+            <li><p>创建模块实例，分配它要用的内存。</p></li>
+            <li><p>调用模块导出的初始化函数，让它准备好自己的状态。</p></li>
+            <li><p>之后由事件驱动：有输入就调事件函数，要刷新就调绘制函数。</p></li>
+            <li><p>应用退出前调用收尾函数，让它释放资源。</p></li>
+          </ol>
 
-          <h2>现在缺的那一段</h2>
+          <h2>应用和系统之间的接口</h2>
+          <p>
+            接口分两个方向。下面这组名字是约定，写应用时照着来：
+          </p>
+          <h3>宿主调用应用（你要导出）</h3>
+          <div class="table-wrap">
+            <table class="spec-table">
+              <thead>
+                <tr>
+                  <th>导出函数</th>
+                  <th>什么时候被调用</th>
+                  <th>要做什么</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>mos_init</code></td>
+                  <td>模块加载完成后，一次</td>
+                  <td>初始化状态，准备好要用的内存</td>
+                </tr>
+                <tr>
+                  <td><code>mos_event</code></td>
+                  <td>用户输入、生命周期变化</td>
+                  <td>处理事件，更新内部状态</td>
+                </tr>
+                <tr>
+                  <td><code>mos_frame</code></td>
+                  <td>每次需要刷新界面</td>
+                  <td>把该画的东西画出来</td>
+                </tr>
+                <tr>
+                  <td><code>mos_stop</code></td>
+                  <td>应用退出前，一次</td>
+                  <td>释放资源，保存该存的</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>应用调用系统（你要导入）</h3>
+          <div class="table-wrap">
+            <table class="spec-table">
+              <thead>
+                <tr>
+                  <th>导入函数</th>
+                  <th>用途</th>
+                  <th>需要的权限</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>mos_log(ptr, len)</code></td>
+                  <td>输出一行日志，调试用</td>
+                  <td>无需声明</td>
+                </tr>
+                <tr>
+                  <td><code>mos_now_ms()</code></td>
+                  <td>当前时间戳，毫秒</td>
+                  <td>无需声明</td>
+                </tr>
+                <tr>
+                  <td><code>mos_read_asset(id, buf, len)</code></td>
+                  <td>读取自己包内的资源文件</td>
+                  <td>无需声明</td>
+                </tr>
+                <tr>
+                  <td><code>mos_store_get / mos_store_set</code></td>
+                  <td>读写应用自己的持久化数据</td>
+                  <td><code>storage</code></td>
+                </tr>
+                <tr>
+                  <td><code>mos_notify(title, body)</code></td>
+                  <td>往状态栏发一条通知</td>
+                  <td><code>notify</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
           <div class="callout">
-            <span class="label">这是理解现状最重要的一点</span>
+            <span class="label">权限是清单里写死的</span>
             <p>
-              Wasm 模块目前拿不到任何系统能力。它没有文件、没有网络、拿不到时间，只能自己算自己的。
-              原因在 02 节讲过：Wasm 跑在沙箱里，要用外部能力得由宿主导入函数，而这套导入约定还没写。
-            </p>
-            <p>
-              所以严格来说，现在还没有真正的「应用」，只有一个能跑起来的 Wasm 示例。
-              后面所有关于应用的设想，都卡在这一步。
+              用到 <code>storage</code> 或 <code>notify</code> 这类受控能力，
+              必须在清单的 <code>permissions</code> 里声明，安装时会列给用户确认。
+              没声明的话，宿主根本不会把这些函数注册进来，模块加载时就找不到导入。
             </p>
           </div>
-          <p>另外几处还没接上的地方：</p>
-          <ul class="bullet-list">
-            <li>Web 端和 Android 端各写一套界面，视觉靠人工对齐，没有共享的部分</li>
-            <li>桌面上的图标点开没有实际内容，Dock 目前是静态的</li>
-            <li>应用从哪来、怎么装、版本怎么管都还没开始设计</li>
-            <li>Native 层有日志和崩溃处理，Web 侧什么都没有</li>
-          </ul>
+
+          <h2>四个仓库</h2>
+          <div class="table-wrap">
+            <table class="spec-table">
+              <thead>
+                <tr>
+                  <th>仓库</th>
+                  <th>内容</th>
+                  <th>跟你有关吗</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>MOS</td>
+                  <td>Web 入口、桌面与触屏界面</td>
+                  <td>改入口或界面时才需要</td>
+                </tr>
+                <tr>
+                  <td>mos-android</td>
+                  <td>原生宿主、wasm3、C++ 主循环</td>
+                  <td>要加新的导入函数时才需要</td>
+                </tr>
+                <tr>
+                  <td>mos-repo</td>
+                  <td>软件源，放应用包</td>
+                  <td>发布应用时要用</td>
+                </tr>
+                <tr>
+                  <td>mos-doc</td>
+                  <td>这份文档</td>
+                  <td>发现写错时欢迎改</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            四个仓库之间没有代码依赖，谁也不 import 谁，只是职责上分层。
+          </p>
 
           <div class="check">
             <h3>这一节要点</h3>
             <ul>
-              <li>四层：体验、接入、执行、应用，前两层在 Web，后两层在 Android</li>
-              <li>Web 侧一次请求走完，Worker 只做 UA 分流，最终由静态资源产出页面</li>
-              <li>Android 侧由 NativeActivity 拉起 C++ 主循环，wasm3 负责执行模块</li>
-              <li>两半之间没有通信，Wasm 拿不到系统能力是当前最大的缺口</li>
+              <li>四层：应用、执行、接入、体验，你写的东西在最上面</li>
+              <li>加载流程固定：读包 → 注册导入 → 建实例 → 调 init → 事件驱动 → 调 stop</li>
+              <li>导出 <code>mos_init / mos_event / mos_frame / mos_stop</code> 给宿主调</li>
+              <li>受控能力要在清单 permissions 里声明，否则宿主不会注册</li>
             </ul>
           </div>
 
           <nav class="pager">
             <a class="pager-item" href="./concepts.html">
               <span>上一节</span>
-              <strong>02 预备概念</strong>
+              <strong>04 预备概念</strong>
             </a>
-            <a class="pager-item pager-next" href="./repos.html">
+            <a class="pager-item pager-next" href="./appdev.html">
               <span>下一节</span>
-              <strong>04 代码在哪</strong>
+              <strong>06 写第一个应用</strong>
             </a>
           </nav>
         </div>

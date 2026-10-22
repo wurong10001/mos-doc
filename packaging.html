@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MOS 文档 · 打包与发布</title>
+    <meta name="description" content="MOS 应用包的目录结构、清单字段、版本规则，以及提交到软件源的流程" />
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <aside class="sidebar">
+        <div class="brand-wrap">
+          <div class="brand-mark">M</div>
+          <div>
+            <div class="brand-name">MOS 文档</div>
+            <div class="brand-subtitle">使用 · 开发</div>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="章节导航">
+          <div class="nav-group">使用 MOS</div>
+          <a class="nav-item" href="./index.html"><span class="nav-no">01</span>开始</a>
+          <a class="nav-item" href="./access.html"><span class="nav-no">02</span>访问与界面</a>
+          <a class="nav-item" href="./using.html"><span class="nav-no">03</span>桌面与应用</a>
+          <div class="nav-group">开发 MOS 应用</div>
+          <a class="nav-item" href="./concepts.html"><span class="nav-no">04</span>预备概念</a>
+          <a class="nav-item" href="./architecture.html"><span class="nav-no">05</span>系统构成</a>
+          <a class="nav-item" href="./appdev.html"><span class="nav-no">06</span>写第一个应用</a>
+          <a class="nav-item active" href="./packaging.html"><span class="nav-no">07</span>打包与发布</a>
+        </nav>
+
+        <div class="sidebar-foot">
+          <a href="https://github.com/wurong10001" target="_blank" rel="noreferrer">wurong10001</a>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="wrap">
+          <header class="topbar">
+            <div class="crumb">MOS / 07 打包与发布</div>
+            <a class="header-action" href="https://github.com/wurong10001" target="_blank" rel="noreferrer">GitHub</a>
+          </header>
+
+          <span class="lesson-no">第 07 节</span>
+          <h1>打包与发布</h1>
+
+          <p class="lead">
+            模块编出来只是第一步。要让用户能在 MOS 上装到它，
+            需要把模块和资源按约定的结构收成一个应用包，写一份清单，再提交到软件源。
+          </p>
+
+          <h2>目录结构</h2>
+          <p>一个应用包的源码目录长这样：</p>
+          <pre class="flow">my-app/
+├── app.toml          # 清单，必需
+├── icon.png          # 图标，必需
+├── src/              # 源码
+│   └── main.c
+├── assets/           # 应用自带的资源
+│   └── data.bin
+└── dist/
+    └── app.wasm      # 编译产物，打包时打进去</pre>
+          <p>
+            <code>dist/</code> 里的是编译产物，不进版本库；
+            发布时打的是它，不是源码。
+          </p>
+
+          <h2>清单 app.toml</h2>
+          <p>清单描述这个应用是什么、需要什么。一个例子：</p>
+          <pre class="code-block">id = "dev.example.clock"
+name = "时钟"
+version = "0.1.0"
+entry = "dist/app.wasm"
+icon = "icon.png"
+
+description = "一个显示当前时间的示例应用"
+author = "your-name"
+
+permissions = ["storage"]
+
+[resources]
+limit_memory_kb = 1024</pre>
+          <h3>必填字段</h3>
+          <div class="table-wrap">
+            <table class="spec-table">
+              <thead>
+                <tr>
+                  <th>字段</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>id</code></td>
+                  <td>唯一标识，反域名写法。一旦发布就不要改，改了等于换了个应用</td>
+                </tr>
+                <tr>
+                  <td><code>name</code></td>
+                  <td>显示名，出现在桌面图标下方和窗口标题栏</td>
+                </tr>
+                <tr>
+                  <td><code>version</code></td>
+                  <td>三段式版本号，见下面的版本规则</td>
+                </tr>
+                <tr>
+                  <td><code>entry</code></td>
+                  <td>Wasm 模块在包内的路径</td>
+                </tr>
+                <tr>
+                  <td><code>icon</code></td>
+                  <td>图标文件路径，建议正方形 PNG</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>选填字段</h3>
+          <div class="table-wrap">
+            <table class="spec-table">
+              <thead>
+                <tr>
+                  <th>字段</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>description</code></td>
+                  <td>一句话说明，安装时显示给用户</td>
+                </tr>
+                <tr>
+                  <td><code>author</code></td>
+                  <td>作者名或联系方式</td>
+                </tr>
+                <tr>
+                  <td><code>permissions</code></td>
+                  <td>要用到的受控能力，见 05 节的接口表</td>
+                </tr>
+                <tr>
+                  <td><code>[resources]</code></td>
+                  <td>资源上限，比如内存配额</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout">
+            <span class="label">permissions 别多写</span>
+            <p>
+              用到什么声明什么。多声明的能力在安装时会列给用户，
+              平白增加顾虑；而且以后要收回权限，等于改了应用的契约。
+            </p>
+          </div>
+
+          <h2>版本规则</h2>
+          <p>
+            用三段式 <code>主版本.次版本.修订号</code>，递增规则如下：
+          </p>
+          <ul class="bullet-list">
+            <li><strong>修订号</strong> — 修 bug，行为不变，用户无感</li>
+            <li><strong>次版本</strong> — 加了功能，向下兼容，老数据还能用</li>
+            <li><strong>主版本</strong> — 有不兼容的改动，比如改了数据格式、去掉了功能</li>
+          </ul>
+          <p>
+            <code>0.x.x</code> 阶段可以宽松些，但一旦有别人在用，就按上面的来。
+            已经发布过的版本号不能重新发 —— 改了内容就往上升。
+          </p>
+
+          <h2>打包</h2>
+          <p>
+            应用包就是一个归档文件，扩展名 <code>.mosapp</code>。
+            里面是清单、图标、Wasm 模块和资源，目录结构跟源码目录保持一致：
+          </p>
+          <pre class="code-block">$ mosapp pack ./my-app
+  → my-app-0.1.0.mosapp
+
+$ mosapp check my-app-0.1.0.mosapp
+  清单字段完整 ✓
+  entry 指向的模块存在 ✓
+  声明的权限均已实现 ✓</pre>
+          <p>
+            发布前先 <code>check</code> 一遍。它会验证清单字段是否齐全、
+            entry 指向的文件在不在、声明的权限宿主是否支持 —— 
+            这几项出错的话，用户那边会装到一半失败。
+          </p>
+
+          <h2>提交到软件源</h2>
+          <p>软件源就是 <code>mos-repo</code> 仓库，走 Pull Request 的流程：</p>
+          <ol class="steps">
+            <li><p>Fork <code>mos-repo</code>，在 <code>apps/&lt;你的 id&gt;/</code> 下建目录。</p></li>
+            <li><p>把应用包和清单放进去，<code>.wasm</code> 要一起提交，源仓库需要能直接拿到产物。</p></li>
+            <li><p>更新仓库里的索引文件，把新应用 id 和版本登记上去。</p></li>
+            <li><p>发 Pull Request，说明这个应用做什么、为什么需要它声明的权限。</p></li>
+            <li><p>合并后，用户在 MOS 的软件源里就能搜到并安装了。</p></li>
+          </ol>
+          <div class="callout">
+            <span class="label">为什么要走 PR</span>
+            <p>
+              软件源是集中式的，装什么由这个仓库决定。
+              走 PR 是为了让每个进来的应用包都经过一次人工过目 —— 
+              看它声明了哪些权限、包里到底有什么。这是这套设计换来可控性的代价。
+            </p>
+          </div>
+
+          <h2>发布之后</h2>
+          <ul class="bullet-list">
+            <li>改了代码就升版本号，重新打包，再发一个 PR 更新包文件</li>
+            <li>用户那边看到新版本可以更新，也可以留在旧版本</li>
+            <li>发现问题需要下架，在 PR 里说明原因，从索引里移除</li>
+          </ul>
+
+          <div class="check">
+            <h3>这一节要点</h3>
+            <ul>
+              <li>包结构：app.toml + icon.png + dist/app.wasm + 资源</li>
+              <li>必填字段 id / name / version / entry / icon，id 发布后不能改</li>
+              <li>版本三段式，已发布的版本号不能重发</li>
+              <li>发布前 <code>mosapp check</code>，提交到 mos-repo 走 PR</li>
+            </ul>
+          </div>
+
+          <nav class="pager">
+            <a class="pager-item" href="./appdev.html">
+              <span>上一节</span>
+              <strong>06 写第一个应用</strong>
+            </a>
+            <div class="pager-empty"></div>
+          </nav>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
