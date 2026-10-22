@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>MOS 仓库说明</title>
-    <meta name="description" content="MOS 各仓库职责与关系说明" />
+    <meta name="description" content="MOS 四个仓库分别放着什么，以及各自现在的状态" />
     <link rel="stylesheet" href="./assets/style.css" />
   </head>
   <body>
@@ -37,101 +37,52 @@
 
         <section class="card-grid two-col">
           <article class="card">
-            <h3>wurong10001/MOS</h3>
-            <p>核心入口仓库，负责 Web 桌面界面与 Cloudflare Workers 服务。</p>
+            <h3>MOS</h3>
+            <p>Web 入口，也是目前唯一能公开访问的部分。Worker 加上两个静态页面，代码量很小。</p>
             <ul class="bullet-list compact">
-              <li>入口：`src/index.js`</li>
-              <li>界面：`public/desktop.html` / `public/mobile.html`</li>
-              <li>样式：`public/assets/system.css`</li>
-              <li>部署：Wrangler</li>
+              <li><code>src/index.js</code> — 全部服务端逻辑，就一个 UA 判断</li>
+              <li><code>public/desktop.html</code> — 桌面端界面</li>
+              <li><code>public/mobile.html</code> — 触屏端界面</li>
+              <li><code>public/assets/system.css</code> — 两边共用的样式</li>
             </ul>
+            <p>部署走 Wrangler，推到 Cloudflare Workers 上。</p>
           </article>
 
           <article class="card">
-            <h3>wurong10001/mos-repo</h3>
-            <p>系统软件源仓库，承担软件资产归档与后续模块分发的职责。</p>
+            <h3>mos-android</h3>
+            <p>原生宿主。工程是标准 Gradle 结构，C++ 部分用 CMake 编。</p>
             <ul class="bullet-list compact">
-              <li>描述：MOS 系统软件源</li>
-              <li>方向：应用与模块源</li>
-              <li>定位：系统软件源</li>
+              <li><code>app/src/main/cpp/main.cpp</code> — 主循环</li>
+              <li><code>app/src/main/cpp/engine.cpp</code> — 引擎调度</li>
+              <li><code>app/src/main/cpp/wasm_runner.cpp</code> — Wasm 加载与调用</li>
+              <li><code>app/src/main/assets/sample.wasm</code> — 示例模块</li>
             </ul>
+            <p>原生库是预编译好放进 jniLibs 的，不在本地走 NDK 编译，这样在 Termux 这类环境也能构建。</p>
           </article>
 
           <article class="card">
-            <h3>wurong10001/mos-android</h3>
-            <p>原生 Android 的系统运行时实现，负责本地宿主、C++ 引擎与 Wasm 执行场景。</p>
-            <ul class="bullet-list compact">
-              <li>语言：C++ / Java / CMake / Shell</li>
-              <li>关键文件：`app/build.gradle`，`CMakeLists.txt`</li>
-              <li>能力：NativeActivity、Wasm3、崩溃处理</li>
-            </ul>
+            <h3>mos-repo</h3>
+            <p>
+              打算做软件源的地方。现在除了一个 README 说明"MOS 系统软件源"，里面什么都没有。
+            </p>
+            <p>要等应用包格式定下来，这个仓库才有东西可放。</p>
           </article>
 
           <article class="card">
-            <h3>wurong10001/mos-doc</h3>
-            <p>统一文档站点仓库，负责架构说明、开发手册、路线图、维护文档的集中化管理。</p>
-            <ul class="bullet-list compact">
-              <li>当前职责：文档维护</li>
-              <li>适用方式：GitHub Pages 文档站</li>
-              <li>目标：统一认识、统一协作</li>
-            </ul>
+            <h3>mos-doc</h3>
+            <p>你正在看的这个站。纯静态，五个 HTML 加一个 style.css，托管在 GitHub Pages。</p>
+            <p>改动流程：改 HTML，推到 main，Pages 自动重新部署。</p>
           </article>
+        </section>
+
+        <section class="card">
+          <h3>依赖关系</h3>
+          <p>
+            四个仓库之间没有代码依赖，互不 import。它们只是概念上分层 —— 
+            入口在 MOS，运行时在 mos-android，以后的应用包放 mos-repo，说明写在这里。
+          </p>
         </section>
       </main>
     </div>
   </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

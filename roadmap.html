@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>MOS 路线图</title>
-    <meta name="description" content="MOS 项目路线图" />
+    <meta name="description" content="MOS 接下来要做的事，按依赖顺序排" />
     <link rel="stylesheet" href="./assets/style.css" />
   </head>
   <body>
@@ -35,58 +35,76 @@
           </div>
         </header>
 
+        <p>
+          下面按依赖顺序排，不是按时间排。前面没做完，后面基本没法开始。
+        </p>
+
         <section class="card-grid two-col">
           <article class="card milestone">
-            <span class="phase">Phase 1</span>
-            <h3>桌面原型建立</h3>
-            <p>完成桌面 / 触屏界面 shell，并稳定两套视觉风格。</p>
+            <span class="phase doing">进行中</span>
+            <h3>定下 Wasm 和原生层的接口</h3>
+            <p>
+              现在 Wasm 模块只能自己跑自己，拿不到任何系统能力。
+              要先定一组 import 函数，比如日志、计时、读资源，然后在 wasm_runner.cpp 里实现。
+              这件事卡着后面所有应用开发，最优先。
+            </p>
           </article>
 
           <article class="card milestone">
-            <span class="phase">Phase 2</span>
-            <h3>Web 入口服务化</h3>
-            <p>提升 Cloudflare Worker 路由能力，形成统一入口、统一资源加载、统一启动逻辑。</p>
+            <span class="phase doing">进行中</span>
+            <h3>桌面图标点开后有东西</h3>
+            <p>
+              Dock 上的图标目前是摆设。最小改动是让点击打开一个窗口容器，
+              容器里加载 Wasm 模块。需要先有上一条的接口。
+            </p>
           </article>
 
           <article class="card milestone">
-            <span class="phase">Phase 3</span>
-            <h3>Android 宿主稳定化</h3>
-            <p>完善 Native 层事件循环、日志、崩溃处理、Wasm 运行时管理。</p>
+            <span class="phase">未开始</span>
+            <h3>应用包格式</h3>
+            <p>
+              一个应用包含什么、怎么描述元信息、版本怎么标。定下来之后 mos-repo 才有内容可放，
+              也才能谈安装和更新。
+            </p>
           </article>
 
           <article class="card milestone">
-            <span class="phase">Phase 4</span>
-            <h3>软件源化</h3>
-            <p>以 `mos-repo` 为基础，归档应用、模块与包结构，形成统一软件源。</p>
+            <span class="phase">未开始</span>
+            <h3>窗口管理</h3>
+            <p>
+              Android 侧没有窗口概念，多开应用时会互相覆盖。需要一套简单的窗口栈，
+              处理切换、关闭和焦点。
+            </p>
           </article>
 
           <article class="card milestone">
-            <span class="phase">Phase 5</span>
-            <h3>系统生态扩展</h3>
-            <p>在 Web + Android + Wasm 的基础上，逐步实现文件管理、通知、设置、应用启动器等基本系统能力。</p>
+            <span class="phase">未开始</span>
+            <h3>日志和崩溃收集</h3>
+            <p>
+              现在排查问题只能看 logcat。Native 层的崩溃没有符号化，堆栈基本没法读。
+              先把这两件事做起来，再做性能优化才有依据。
+            </p>
           </article>
+
+          <article class="card milestone">
+            <span class="phase">未开始</span>
+            <h3>Web 和 Android 的界面共用一套</h3>
+            <p>
+              两边各写一份 HTML 和原生布局，视觉靠人工对齐，改动要同步两处。
+              长期看需要抽出一层共用的描述，短期只能靠文档约束。
+            </p>
+          </article>
+        </section>
+
+        <section class="card">
+          <h3>暂时不做的</h3>
+          <ul class="bullet-list">
+            <li>多用户、权限体系</li>
+            <li>应用商店和在线分发</li>
+            <li>把 wasm3 换成带 JIT 的运行时（先跑通再谈性能）</li>
+          </ul>
         </section>
       </main>
     </div>
   </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

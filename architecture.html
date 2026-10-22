@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>MOS 架构设计</title>
-    <meta name="description" content="MOS 架构设计说明" />
+    <meta name="description" content="MOS 的分层结构：Web 入口、Android 宿主与 Wasm 执行层" />
     <link rel="stylesheet" href="./assets/style.css" />
   </head>
   <body>
@@ -25,11 +25,6 @@
           <a class="nav-item" href="./development.html">开发手册</a>
           <a class="nav-item" href="./roadmap.html">路线图</a>
         </nav>
-
-        <div class="mini-card">
-          <div class="mini-label">架构重点</div>
-          <div class="mini-value">桌面 / 运行时 / 扩展</div>
-        </div>
       </aside>
 
       <main class="content">
@@ -41,158 +36,67 @@
         </header>
 
         <section class="card">
-          <h3>整体分层</h3>
+          <h3>四层怎么分的</h3>
           <div class="layer-diagram">
             <div class="layer-box">
-              <span class="layer-name">层 1：体验层</span>
-              <span>桌面 UI / 移动端触屏 UI</span>
+              <span class="layer-name">体验层</span>
+              <span>desktop.html / mobile.html</span>
             </div>
             <div class="layer-box">
-              <span class="layer-name">层 2：接入层</span>
-              <span>Cloudflare Worker + 静态资源服务</span>
+              <span class="layer-name">接入层</span>
+              <span>Cloudflare Worker</span>
             </div>
             <div class="layer-box">
-              <span class="layer-name">层 3：执行层</span>
-              <span>Android Native + C++ + Wasm</span>
+              <span class="layer-name">执行层</span>
+              <span>NativeActivity + C++</span>
             </div>
             <div class="layer-box">
-              <span class="layer-name">层 4：应用层</span>
-              <span>软件源 / 业务模块 / 统一扩展</span>
+              <span class="layer-name">应用层</span>
+              <span>wasm3 + Wasm 模块</span>
             </div>
           </div>
+          <p>
+            上面两层在 Web 侧，一次 HTTP 请求就走完了；下面两层在 Android 侧，跟网络没关系。
+            两边目前没有通信，各跑各的，这是眼下最大的结构缺口。
+          </p>
         </section>
 
         <section class="card-grid two-col">
           <article class="card">
             <h3>Web 入口</h3>
             <p>
-              `MOS` 仓库通过 Cloudflare Worker 接收请求。
-              如果访问根路径，代码会根据 UA 判断设备类型：桌面端或移动端，然后跳转到对应页面。
+              Worker 只做一件事：看到根路径，读 UA，把请求改写到对应页面，再把请求转给静态资源。
             </p>
             <pre class="code-block">if (url.pathname === '/') {
   const isTouchDevice = /android|iphone|ipad|mobile/i.test(userAgent);
   url.pathname = isTouchDevice ? '/mobile.html' : '/desktop.html';
 }</pre>
+            <p>没有后端，没有数据库，改界面就是改 public 目录下的 HTML 和 CSS。</p>
           </article>
 
           <article class="card">
             <h3>Android 宿主</h3>
             <p>
-              `mos-android` 采用 NativeActivity + C++ 作为原生宿主层，使用 `wasm3` 来执行 WebAssembly 代码，
-              使系统具备轻量运行时能力与跨平台扩展潜力。
+              主循环在 main.cpp，引擎调度在 engine.cpp，Wasm 的加载和调用在 wasm_runner.cpp。
+              三者通过 app/src/main/cpp/CMakeLists.txt 一起编成 native library。
+            </p>
+            <p>
+              解释器选 wasm3 而不是 Wasmtime，原因是它体积小、依赖少，塞进 APK 不占地方，
+              代价是执行速度比 JIT 方案慢一截。
             </p>
           </article>
         </section>
 
         <section class="card">
-          <h3>设计特点</h3>
+          <h3>几个还没定的问题</h3>
           <ul class="bullet-list">
-            <li>以“桌面系统交互”作为视觉基线，而不是普通网页布局。</li>
-            <li>Web 端和 Android 端的用户感知保持同一系统语言。</li>
-            <li>Wasm 执行能力为后续扩展应用/模块提供底层标准化执行环境。</li>
-            <li>系统设计允许从 UI 原型逐步演化为完整的应用生态。</li>
+            <li>Wasm 模块怎么调用系统能力，还没有 import 约定，现在只能自己跑自己</li>
+            <li>Web 端和 Android 端各有一套界面代码，视觉靠人工对齐，没有共享的部分</li>
+            <li>应用从哪来、怎么装、版本怎么管，都还没开始设计</li>
+            <li>Native 层的日志和崩溃收集只在 Android 侧有，Web 侧什么都没有</li>
           </ul>
         </section>
       </main>
     </div>
   </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

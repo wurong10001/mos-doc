@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>MOS 开发手册</title>
-    <meta name="description" content="MOS 开发手册与运行环境说明" />
+    <meta name="description" content="MOS 各端的构建命令、环境要求和已知限制" />
     <link rel="stylesheet" href="./assets/style.css" />
   </head>
   <body>
@@ -35,69 +35,71 @@
           </div>
         </header>
 
-        <section class="card">
-          <h3>开发环境</h3>
-          <ul class="bullet-list">
-            <li>Web 端：Node.js + Wrangler</li>
-            <li>Android 端：Android Studio / Gradle / CMake / NDK</li>
-            <li>文档站：GitHub Pages（静态站点）</li>
-          </ul>
-        </section>
-
         <section class="card-grid two-col">
           <article class="card">
-            <h3>Web 端构建</h3>
+            <h3>Web 端</h3>
             <pre class="code-block">cd MOS
 npm install
 npm run dev</pre>
-            <p>由 `wrangler` 提供 Cloudflare Workers 托管能力。页面会根据 UA 自动选择桌面或移动端 shell。</p>
+            <p>
+              Wrangler 会在本地起一个 Worker。判断 UA 的逻辑在浏览器里不好测，
+              可以在开发者工具里切设备模拟，或者直接访问 <code>/desktop.html</code> 和 <code>/mobile.html</code>。
+            </p>
           </article>
 
           <article class="card">
-            <h3>Android 端构建</h3>
+            <h3>Android 端</h3>
             <pre class="code-block">cd mos-android
 ./gradlew assembleDebug</pre>
-            <p>当前工程通过 `app/build.gradle` 和 `CMakeLists.txt` 进行构建，并将原生库放入 `jniLibs` 目录以适配特定环境。</p>
+            <p>
+              原生库不走 NDK 现场编译，是预编译好放进 <code>jniLibs</code> 的。
+              所以改了 C++ 之后要重新编一次 .so 再拷过去，光跑 gradlew 不会生效。
+            </p>
           </article>
         </section>
 
         <section class="card">
-          <h3>推荐开发流程</h3>
-          <ol class="number-list">
-            <li>先理解 MOS 的三层架构：UI / 接入 / 运行时。</li>
-            <li>使用 `MOS` 仓库做界面草稿与交互验证。</li>
-            <li>在 `mos-android` 中确认原生层与运行时行为是否一致。</li>
-            <li>把稳定模块收录进 `mos-repo`。</li>
-            <li>用 `mos-doc` 统一整理设计、开发约定和使用说明。</li>
-          </ol>
+          <h3>环境</h3>
+          <div class="table-wrap">
+            <table class="spec-table">
+              <thead>
+                <tr>
+                  <th>端</th>
+                  <th>需要什么</th>
+                  <th>备注</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Web</td>
+                  <td>Node.js、Wrangler</td>
+                  <td>有 Cloudflare 账号才能部署</td>
+                </tr>
+                <tr>
+                  <td>Android</td>
+                  <td>Android Studio、Gradle、CMake</td>
+                  <td>编译目标 30，NDK 只在重新编 .so 时需要</td>
+                </tr>
+                <tr>
+                  <td>文档站</td>
+                  <td>浏览器</td>
+                  <td>改完推 main，GitHub Pages 自己更新</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card">
+          <h3>改代码前先知道</h3>
+          <ul class="bullet-list">
+            <li>Web 端没有构建步骤，HTML 就是最终产物，改完刷新即可</li>
+            <li>Android 端的 C++ 改动要手动重编 .so，这是最容易踩的一步</li>
+            <li>sample.wasm 是唯一能跑的模块，加新模块先照着它的调用方式写</li>
+            <li>Wasm 和原生层之间没有接口约定，改这块前最好先在文档里把约定写下来</li>
+          </ul>
         </section>
       </main>
     </div>
   </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
